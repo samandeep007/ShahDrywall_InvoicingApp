@@ -19,7 +19,7 @@ export default function Invoice() {
       area: "",
       rate: "",
       amount: "",
-      soundBars: "", // Replaced extraCharges with soundBars
+      soundBars: "0", // Replaced extraCharges with soundBars
       floors: "",
     },
   ]);
