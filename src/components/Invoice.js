@@ -19,12 +19,11 @@ export default function Invoice() {
       area: "",
       rate: "",
       amount: "",
-      extraCharges: "",
-      extraChargesFor: "",
+      soundBars: "", // Replaced extraCharges with soundBars
       floors: "",
     },
   ]);
-  const [helper, setHelper] = useState({ name: "", amount: "" });
+  const [helpers, setHelpers] = useState([{ name: "", amount: "" }]);
 
   const handleAddressChange = (index, value) => {
     const updatedAddresses = [...addresses];
@@ -43,30 +42,24 @@ export default function Invoice() {
     updatedAddresses[index].rate = value;
     const area = parseFloat(updatedAddresses[index].area || 0);
     const rate = parseFloat(value || 0);
-    const extraCharges = parseFloat(updatedAddresses[index].extraCharges || 0);
+    const soundBars = parseFloat(updatedAddresses[index].soundBars || 0); // Updated to soundBars
     updatedAddresses[index].amount = (
       area * (rate / 100) +
-      extraCharges
+      soundBars // Included soundBars in amount calculation
     ).toFixed(2);
     setAddresses(updatedAddresses);
   };
 
-  const handleExtraChargesChange = (index, value) => {
+  const handleSoundBarsChange = (index, value) => {
     const updatedAddresses = [...addresses];
-    updatedAddresses[index].extraCharges = value;
+    updatedAddresses[index].soundBars = value; // Updated to soundBars
     const area = parseFloat(updatedAddresses[index].area || 0);
     const rate = parseFloat(updatedAddresses[index].rate || 0);
-    const extraCharges = parseFloat(value || 0);
+    const soundBars = parseFloat(value || 0);
     updatedAddresses[index].amount = (
       area * (rate / 100) +
-      extraCharges
+      soundBars // Included soundBars in amount calculation
     ).toFixed(2);
-    setAddresses(updatedAddresses);
-  };
-
-  const handleExtraChargesForChange = (index, value) => {
-    const updatedAddresses = [...addresses];
-    updatedAddresses[index].extraChargesFor = value;
     setAddresses(updatedAddresses);
   };
 
@@ -84,19 +77,21 @@ export default function Invoice() {
         area: "",
         rate: "",
         amount: "",
-        extraCharges: "",
-        extraChargesFor: "",
+        soundBars: "", // Replaced extraCharges with soundBars
         floors: "",
       },
     ]);
   };
 
-  const handleHelperName = (value) => {
-    setHelper({ name: value, amount: null });
+
+  const handleHelperChange = (index, field, value) => {
+    const updatedHelpers = [...helpers];
+    updatedHelpers[index][field] = value;
+    setHelpers(updatedHelpers);
   };
 
-  const handleHelperAmount = (value) => {
-    setHelper({ name: helper.name, amount: value });
+  const handleAddHelper = () => {
+    setHelpers([...helpers, { name: "", amount: "" }]);
   };
 
   const totalAmount = addresses.reduce((total, address) => {
@@ -104,57 +99,208 @@ export default function Invoice() {
     return total + amount;
   }, 0);
 
+  const totalHelperAmount = helpers.reduce((total, helper) => {
+    return total + parseFloat(helper.amount || 0);
+  }, 0);
+
+  const adjustedTotalAmount = totalAmount - totalHelperAmount; 
+  const gstAmount = adjustedTotalAmount * 0.05; 
+  const finalAmount = adjustedTotalAmount + gstAmount; 
+
+
   const totalArea = addresses.reduce((total, address) => {
     return total + parseFloat(address.area || 0);
   }, 0);
 
+
   pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
-  const styles = StyleSheet.create({
-    page: {
-      fontFamily: "Helvetica",
-      fontSize: 11,
-      lineHeight: 1.5,
-      flexDirection: "column",
-      backgroundColor: "rgb(249 249 249)",
-    },
-    section: {
-      marginBottom: 40,
-      flexDirection: "row",
-      justifyContent: "space-between",
-      color: "white",
-      backgroundColor: "rgb(8, 8, 34)",
-      padding: "20px",
-    },
-    table: {
-      padding: "0 30px",
-      marginBottom: 40,
-      flexDirection: "row",
-    },
-    title: {
-      fontSize: 24,
-      marginBottom: 10,
-    },
-    company: {
-      flexDirection: "column",
-      fontSize: 14,
-      fontWeight: "bold",
-    },
-    rows: {
-      marginLeft: "30px",
-      marginBottom: "30px",
-      fontSize: 14,
-    },
-    companyName: {
-      fontWeight: "bold",
-      fontSize: "20px",
-    },
-    total: {
-      fontSize: "16px",
-      fontWeight: "bold",
-      marginLeft: "30px",
-    },
-  });
+
+  const generatePdf = () => {
+    // Calculate total helpers' amount
+    const totalHelpersAmount = helpers.reduce((sum, helper) => sum + parseFloat(helper.amount || 0), 0);
+    
+    // Deduct helpers' amount from final amount before calculating GST
+    const adjustedFinalAmount = totalAmount - totalHelpersAmount;
+    const gstAmount = adjustedFinalAmount * 0.05; // Calculate GST on the adjusted amount
+    const grandTotal = adjustedFinalAmount + gstAmount; // Grand total includes GST
+  
+    const docDefinition = {
+      content: [
+        {
+          columns: [
+            {
+              stack: [
+                { text: "Shah Drywall Ltd.", style: "companyName" },
+                { text: "6014 Saddlehorn Dr NE, T3J 4M4", style: "companyAddress" },
+                { text: "GST Number: 123456789", style: "companyAddress" },
+              ],
+              alignment: "left",
+            },
+          ],
+          margin: [0, 0, 0, 20],
+        },
+        { text: "Invoice", style: "header" },
+        {
+          columns: [
+            {
+              stack: [
+                { text: `Date: ${new Date().toLocaleDateString()}`, style: "date" },
+                { text: "Recipient: Dovmar Drywall Ltd.", style: "recipient" },
+                { text: "Recipient Address: 74 Walden Manor SE, T2X 0N1", style: "recipientAddress" },
+              ],
+              alignment: "left",
+            },
+          ],
+          margin: [0, 0, 0, 20],
+        },
+        {
+          table: {
+            headerRows: 1,
+            widths: [120, 50, 50, 50, 50, 70],
+            body: [
+              [
+                { text: "Address", style: "tableHeader" },
+                { text: "Area (sqft)", style: "tableHeader" },
+                { text: "Floors", style: "tableHeader" },
+                { text: "Rate (%)", style: "tableHeader" },
+                { text: "Sound Bars ($)", style: "tableHeader" },
+                { text: "Amount ($)", style: "tableHeader" },
+              ],
+              ...addresses.map((address) => [
+                { text: address.address, style: "tableCell", alignment: "left" },
+                { text: `${address.area} sqft`, style: "tableCell", alignment: "center" },
+                { text: `${address.floors}`, style: "tableCell", alignment: "center" },
+                { text: `${address.rate}%`, style: "tableCell", alignment: "center" },
+                { text: `$${address.soundBars}`, style: "tableCell", alignment: "center" },
+                { text: `$${address.amount}`, style: "tableCell", alignment: "center" },
+              ]),
+              [
+                { text: "Total", colSpan: 5, alignment: "right", style: "totalCell" },
+                {}, {}, {}, {},
+                { text: `$${totalAmount.toFixed(2)}`, style: "totalCell" },
+              ],
+              [
+                { text: "Helpers Total", colSpan: 5, alignment: "right", style: "totalCell" },
+                {}, {}, {}, {},
+                { text: `-$${totalHelpersAmount.toFixed(2)}`, style: "totalCell" },
+              ],
+              [
+                { text: "Final Amount", colSpan: 5, alignment: "right", style: "totalCell" },
+                {}, {}, {}, {},
+                { text: `$${totalAmount.toFixed(2) - totalHelperAmount.toFixed(2)}`, style: "totalCell" },
+              ],
+              [
+                { text: "GST (5%)", colSpan: 5, alignment: "right", style: "totalCell" },
+                {}, {}, {}, {},
+                { text: `$${gstAmount.toFixed(2)}`, style: "totalCell" },
+              ],
+              [
+                { text: "Grand Total", colSpan: 5, alignment: "right", style: "totalCell" },
+                {}, {}, {}, {},
+                { text: `$${grandTotal.toFixed(2)}`, style: "totalCell" },
+              ],
+            ],
+          },
+          layout: {
+            hLineWidth: (i, node) => (i === 0 || i === node.table.body.length ? 1 : 0.5),
+            vLineWidth: () => 0.5,
+            hLineColor: (i) => (i === 0 ? "black" : "#aaa"),
+            vLineColor: () => "#aaa",
+            paddingLeft: () => 10,
+            paddingRight: () => 10,
+            paddingTop: () => 5,
+            paddingBottom: () => 5,
+          },
+        },
+        // Conditionally render helpers section
+        ...(helpers.length > 0 && helpers[0].name !== "" ? [
+          {
+            text: "Helpers", style: "helpersHeader", margin: [0, 20, 0, 10],
+          },
+          {
+            table: {
+              headerRows: 1,
+              widths: ['*', 70],
+              body: [
+                [
+                  { text: "Helper Name", style: "tableHeader" },
+                  { text: "Amount ($)", style: "tableHeader" },
+                ],
+                ...helpers.map(helper => [
+                  { text: helper.name, style: "tableCell" },
+                  { text: `$${helper.amount}`, style: "tableCell" },
+                ]),
+              ],
+            },
+            layout: 'lightHorizontalLines',
+          },
+        ] : []),
+        {
+          text: "Thank you for your business!", style: "thankYou", alignment: "center", margin: [0, 20, 0, 0],
+        },
+      ],
+      styles: {
+        companyName: {
+          fontSize: 14,
+          bold: true,
+          marginBottom: 2,
+        },
+        companyAddress: {
+          fontSize: 10,
+          marginBottom: 2,
+        },
+        date: {
+          fontSize: 10,
+          marginBottom: 2,
+        },
+        recipient: {
+          fontSize: 12,
+          bold: true,
+          marginBottom: 2,
+        },
+        recipientAddress: {
+          fontSize: 10,
+          marginBottom: 2,
+        },
+        header: {
+          fontSize: 18,
+          bold: true,
+          marginBottom: 20,
+          alignment: "center",
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 12,
+          color: "white",
+          fillColor: "#4F4F4F",
+        },
+        tableCell: {
+          fontSize: 10,
+          margin: [0, 5, 0, 5],
+        },
+        totalCell: {
+          fontSize: 10,
+          bold: true,
+          margin: [0, 5, 0, 5],
+        },
+        helpersHeader: {
+          fontSize: 14,
+          bold: true,
+          marginBottom: 10,
+        },
+        thankYou: {
+          fontSize: 12,
+          italics: true,
+          margin: [0, 20, 0, 0],
+        },
+      },
+    };
+  
+    pdfMake.createPdf(docDefinition).download("invoice.pdf");
+  };
+  
+
 
   return (
     <>
@@ -170,9 +316,8 @@ export default function Invoice() {
           {addresses.map((address, index) => (
             <div
               key={index}
-              className={`mb-4 ${
-                index % 2 === 0 ? "bg-gray-100" : "bg-gray-200"
-              } rounded-md p-4`}
+              className={`mb-4 ${index % 2 === 0 ? "bg-gray-100" : "bg-gray-200"
+                } rounded-md p-4`}
             >
               <label
                 htmlFor={`address-${index}`}
@@ -250,230 +395,71 @@ export default function Invoice() {
                 type="text"
                 value={address.amount}
                 readOnly
-                className="border-gray-300 bg-gray-100 block w-full sm:text-sm border p-2 rounded-md"
-              />
-              <label
-                htmlFor={`extraCharges${index}`}
-                className="block font-bold text-xl mb-2 font-medium text-gray-900"
-              >
-                Extra Charges
-              </label>
-              <input
-                id={`extraCharges${index}`}
-                name={`extraCharges${index}`}
-                type="text"
-                value={address.extraCharges}
-                onChange={(e) =>
-                  handleExtraChargesChange(index, e.target.value)
-                }
-                placeholder="Enter extra charges"
+                placeholder="Amount"
                 className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border p-2 rounded-md"
               />
-              {address.extraCharges > 0 && ( // Only render the input field when extra charges > 0
-                <>
-                  <label
-                    htmlFor={`extraCharges${index}`}
-                    className="block font-bold text-xl mb-2 font-medium text-gray-900"
-                  >
-                    For
-                  </label>
-                  <input
-                    id={`extraChargesfor${index}`}
-                    name={`extraChargesfor${index}`}
-                    type="text"
-                    value={address.extraChargesFor}
-                    onChange={(e) =>
-                      handleExtraChargesForChange(index, e.target.value)
-                    }
-                    placeholder="Enter Purpose"
-                    className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border p-2 rounded-md"
-                  />
-                </>
-              )}
+
+              <label
+                htmlFor={`soundBars-${index}`}
+                className="block font-bold text-xl mb-2 font-medium text-gray-900"
+              >
+                Sound Bars
+              </label>
+              <input
+                id={`soundBars-${index}`}
+                name={`soundBars-${index}`}
+                type="text"
+                value={address.soundBars} // Updated to soundBars
+                onChange={(e) => handleSoundBarsChange(index, e.target.value)}
+                placeholder="Enter sound bars amount"
+                className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border p-2 rounded-md"
+              />
             </div>
           ))}
 
-          <button
-            type="button"
-            onClick={handleAddAddress}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-md mb-4"
-          >
-            Add Address
-          </button>
-
-          <div className={`mb-4 bg-gray-100 rounded-md p-4 pb-8`}>
-            <h2 className="text-center text-2xl text-gray-900 font-bold p-4">
-              Helper Details
-            </h2>
-
-            <label
-              htmlFor={`helperName`}
-              className="block font-bold text-xl mb-2 font-medium text-gray-900"
+          <div className="mb-4">
+            <button
+              onClick={handleAddAddress}
+              className="bg-indigo-500 text-white font-bold py-2 px-4 rounded"
             >
-              Name
-            </label>
-            <input
-              id={`helperName`}
-              name={`helperName`}
-              type="text"
-              value={helper.name}
-              onChange={(e) => handleHelperName(e.target.value)}
-              placeholder="Enter Name"
-              className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border p-2 rounded-md"
-            />
-
-            <label
-              htmlFor={`helperAmount`}
-              className="block font-bold text-xl mb-2 font-medium text-gray-900"
-            >
-              Amount
-            </label>
-            <input
-              id={`helperAmount`}
-              name={`helperAmount`}
-              type="text"
-              value={helper.amount}
-              onChange={(e) => handleHelperAmount(e.target.value)}
-              placeholder="Enter Amount"
-              className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border p-2 rounded-md"
-            />
+              Add Another Address
+            </button>
           </div>
 
-          <h2 className="font-bold text-xl  my-4">
+          {helpers.map((helper, index) => (
+            <div key={index} className="mb-4 bg-gray-200 rounded-md p-4">
+              <label className="block font-bold text-xl mb-2">Helper Name</label>
+              <input type="text" value={helper.name} onChange={(e) => handleHelperChange(index, "name", e.target.value)} placeholder="Enter helper name" className="border-gray-300 block w-full p-2 rounded-md" />
+              <label className="block font-bold text-xl mb-2">Helper Amount</label>
+              <input type="text" value={helper.amount} onChange={(e) => handleHelperChange(index, "amount", e.target.value)} placeholder="Enter helper amount" className="border-gray-300 block w-full p-2 rounded-md" />
+            </div>
+          ))}
+
+          <button onClick={handleAddHelper} className="bg-indigo-500 text-white py-2 px-4 rounded">Add Another Helper</button>
+
+          <div className="text-xl font-bold mt-4">
             Total Area: {totalArea.toFixed(2)} sq.ft
-          </h2>
-          <h2 className="font-bold text-xl mb-2">
-            Total Amount: ${(totalAmount - helper.amount).toFixed(2)}
-          </h2>
-          <h2 className="font-bold text-xl  my-4">
-            GST @5%: ${(parseFloat((totalAmount - helper.amount).toFixed(2)) * 0.05).toFixed(2)}
-          </h2>
-          <h2 className="font-bold text-xl  my-4">
-            Final Amount: $
-            {(
-              parseFloat((totalAmount - helper.amount).toFixed(2) * 0.05) +
-              parseFloat((totalAmount - helper.amount).toFixed(2))
-            ).toFixed(2)}
-          </h2>
-          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            <PDFDownloadLink
-              document={
-                <Document>
-                  <Page size="A4" style={styles.page}>
-                    <View style={styles.section}>
-                      <View style={styles.company}>
-                        <Text>
-                          <Text style={styles.companyName}>
-                            SHAH Drywall Ltd.
-                          </Text>
-                        </Text>
-                        <Text>
-                          <Text style={{ display: "inline" }}>
-                            6014 Saddlehorn Dr NE, T3J 4M4
-                          </Text>
-                        </Text>
-                        <Text>
-                          <Text style={{ display: "inline" }}>
-                            GST# 838419281RP0001
-                          </Text>
-                        </Text>
-                        <Text>
-                          <Text style={{ display: "inline" }}>
-                            WCB# 9565188
-                          </Text>
-                        </Text>
-                      </View>
-                      <View style={styles.company}>
-                        <Text>
-                          <Text style={styles.companyName}>
-                            DOVMAR Drywall Ltd.
-                          </Text>
-                        </Text>
-                        <Text>
-                          <Text style={{ display: "inline" }}>
-                            74 Walden Manor SE, T2X 0N1
-                          </Text>
-                        </Text>
-                      </View>
-                    </View>
-                    <View
-                      style={{
-                        marginTop: "10px",
-                        fontSize: "25px",
-                        margin: "0 auto",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      <Text>Invoice</Text>
-                    </View>
-                    <View
-                      style={{
-                        textAlign: "right",
-                        fontSize: "14px",
-                        marginRight: "30px",
-                      }}
-                    >
-                      {" "}
-                      <Text>Date: {new Date().toLocaleDateString()}</Text>
-                    </View>
+          </div>
+          <div className="text-xl font-bold mt-4">
+            Total Amount: ${adjustedTotalAmount.toFixed(2)}
+          </div>
+          <div className="text-xl font-bold mt-4">
+            GST @5%: ${gstAmount.toFixed(2)}
+          </div>
+          <div className="text-xl font-bold mt-4">
+            Final Amount: ${finalAmount.toFixed(2)}
+          </div>
 
-                    {addresses.map((address, index) => (
-                      <View key={index} style={styles.rows}>
-                        <Text>House Address: {address.address}</Text>
-                        <Text>Floor(s): {address.floors}</Text>
-                        <Text>Area: {address.area} sq.ft</Text>
-                        <Text>Rate: ¢{address.rate}</Text>
-                        {address.extraCharges > 0 && ( // Only render if extra charges > 0
-                          <>
-                            <Text>Extra Charges: ${address.extraCharges}</Text>
-                            <Text>For: {address.extraChargesFor}</Text>
-                          </>
-                        )}
-                        <Text>Amount: ${address.amount}</Text>
-                      </View>
-                    ))}
-
-                    {helper && (
-                    <View  style={styles.rows}>
-                      <Text>Helper Name: {helper.name?(helper.name):("N/A")}</Text>
-                      <Text>Amount: {helper.name?(helper.amount):("N/A")}</Text>
-                    </View>
-                    )}
-
-
-                    <View style={styles.total}>
-                      <Text>Total Area: {totalArea.toFixed(2)} sq.ft</Text>
-                     <Text>{helper.name ? "Total Amount (Excluding helper): " : "Total Amount: "} ${(totalAmount - helper.amount).toFixed(2)}</Text>
-                      <Text>
-                        GST @5%: $
-                        {(parseFloat((totalAmount - helper.amount).toFixed(2)) * 0.05).toFixed(2)}
-                      </Text>
-                      <Text>
-                        Final Amount: $
-                        {(
-                          parseFloat((totalAmount - helper.amount).toFixed(2) * 0.05) +
-                          parseFloat((totalAmount - helper.amount).toFixed(2))
-                        ).toFixed(2)}
-                      </Text>
-                    </View>
-                  </Page>
-                </Document>
-              }
-              fileName="invoice.pdf"
+          <div className="mt-8">
+            <button
+              onClick={generatePdf}
+              className="bg-indigo-600 text-white font-bold py-2 px-4 rounded"
             >
-              {({ blob, url, loading, error }) =>
-                loading ? "Generating Invoice..." : "Generate Invoice"
-              }
-            </PDFDownloadLink>
-          </button>
+              Download PDF
+            </button>
+          </div>
         </div>
       </div>
-      <footer className="bg-gray-200 text-center p-4">
-        <p className="text-sm text-gray-600">
-          &copy; {new Date().getFullYear()} Shah Drywall Ltd. All rights
-          reserved.
-        </p>
-      </footer>
     </>
   );
 }
