@@ -124,7 +124,7 @@ export default function Invoice() {
     const adjustedFinalAmount = totalAmount - totalHelpersAmount;
     const gstAmount = adjustedFinalAmount * 0.05; // Calculate GST on the adjusted amount
     const grandTotal = adjustedFinalAmount + gstAmount; // Grand total includes GST
-  
+
     const docDefinition = {
         content: [
             {
@@ -205,8 +205,8 @@ export default function Invoice() {
                 layout: {
                     hLineWidth: (i, node) => (i === 0 || i === node.table.body.length ? 1 : 0.5),
                     vLineWidth: () => 0.5,
-                    hLineColor: (i) => (i === 0 ? "black" : "#aaa"),
-                    vLineColor: () => "#aaa",
+                    hLineColor: (i) => (i === 0 ? "black" : "#666"), // Darker gray for horizontal lines
+                    vLineColor: () => "#666", // Darker gray for vertical lines
                     paddingLeft: () => 10,
                     paddingRight: () => 10,
                     paddingTop: () => 5,
@@ -236,12 +236,12 @@ export default function Invoice() {
                     layout: {
                         hLineWidth: (i, node) => (i === 0 || i === node.table.body.length ? 1 : 0.5),
                         vLineWidth: () => 0.5,
-                        hLineColor: (i) => (i === 0 ? "black" : "#aaa"),
-                        vLineColor: () => "#aaa",
+                        hLineColor: () => "#666", // Darker gray for horizontal lines
+                        vLineColor: () => "#666", // Darker gray for vertical lines
                         paddingLeft: () => 10,
                         paddingRight: () => 10,
-                        paddingTop: () => 8, // Adjust top padding here
-                        paddingBottom: () => 8, // Adjust bottom padding here
+                        paddingTop: () => 8,
+                        paddingBottom: () => 8,
                     },
                 },
             ] : []),
@@ -277,12 +277,13 @@ export default function Invoice() {
                 bold: true,
                 marginBottom: 20,
                 alignment: "center",
+                fillColor: "#3C3C3C", // Darker background for the header
             },
             tableHeader: {
                 bold: true,
                 fontSize: 12,
                 color: "white",
-                fillColor: "#4F4F4F",
+                fillColor: "#4F4F4F", // Keep this color for table header
             },
             tableCell: {
                 fontSize: 10,
@@ -305,9 +306,10 @@ export default function Invoice() {
             },
         },
     };
-  
+
     pdfMake.createPdf(docDefinition).download("invoice.pdf");
 };
+
 
 
   return (
