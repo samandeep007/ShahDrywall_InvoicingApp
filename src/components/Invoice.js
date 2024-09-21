@@ -133,7 +133,8 @@ export default function Invoice() {
                         stack: [
                             { text: "Shah Drywall Ltd.", style: "companyName" },
                             { text: "6014 Saddlehorn Dr NE, T3J 4M4", style: "companyAddress" },
-                            { text: "GST Number: 123456789", style: "companyAddress" },
+                            { text: "GST Number: 838419281RT0001", style: "companyAddress" },
+                            { text: "WCB Number: 956188", style: "companyAddress" },
                         ],
                         alignment: "left",
                     },
