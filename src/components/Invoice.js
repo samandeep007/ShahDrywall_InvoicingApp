@@ -126,180 +126,188 @@ export default function Invoice() {
     const grandTotal = adjustedFinalAmount + gstAmount; // Grand total includes GST
   
     const docDefinition = {
-      content: [
-        {
-          columns: [
+        content: [
             {
-              stack: [
-                { text: "Shah Drywall Ltd.", style: "companyName" },
-                { text: "6014 Saddlehorn Dr NE, T3J 4M4", style: "companyAddress" },
-                { text: "GST Number: 123456789", style: "companyAddress" },
-              ],
-              alignment: "left",
-            },
-          ],
-          margin: [0, 0, 0, 20],
-        },
-        { text: "Invoice", style: "header" },
-        {
-          columns: [
-            {
-              stack: [
-                { text: `Date: ${new Date().toLocaleDateString()}`, style: "date" },
-                { text: "Recipient: Dovmar Drywall Ltd.", style: "recipient" },
-                { text: "Recipient Address: 74 Walden Manor SE, T2X 0N1", style: "recipientAddress" },
-              ],
-              alignment: "left",
-            },
-          ],
-          margin: [0, 0, 0, 20],
-        },
-        {
-          table: {
-            headerRows: 1,
-            widths: [120, 50, 50, 50, 50, 70],
-            body: [
-              [
-                { text: "Address", style: "tableHeader" },
-                { text: "Area (sqft)", style: "tableHeader" },
-                { text: "Floors", style: "tableHeader" },
-                { text: "Rate (¢)", style: "tableHeader" },
-                { text: "Sound Bars ($)", style: "tableHeader" },
-                { text: "Amount ($)", style: "tableHeader" },
-              ],
-              ...addresses.map((address) => [
-                { text: address.address, style: "tableCell", alignment: "left" },
-                { text: `${address.area} sqft`, style: "tableCell", alignment: "center" },
-                { text: `${address.floors}`, style: "tableCell", alignment: "center" },
-                { text: `¢${address.rate}`, style: "tableCell", alignment: "center" },
-                { text: `$${address.soundBars}`, style: "tableCell", alignment: "center" },
-                { text: `$${address.amount}`, style: "tableCell", alignment: "center" },
-              ]),
-              [
-                { text: "Total", colSpan: 5, alignment: "right", style: "totalCell" },
-                {}, {}, {}, {},
-                { text: `$${totalAmount.toFixed(2)}`, style: "totalCell" },
-              ],
-              [
-                { text: "Helpers Total", colSpan: 5, alignment: "right", style: "totalCell" },
-                {}, {}, {}, {},
-                { text: `-$${totalHelpersAmount.toFixed(2)}`, style: "totalCell" },
-              ],
-              [
-                { text: "Final Amount", colSpan: 5, alignment: "right", style: "totalCell" },
-                {}, {}, {}, {},
-                { text: `$${totalAmount.toFixed(2) - totalHelperAmount.toFixed(2)}`, style: "totalCell" },
-              ],
-              [
-                { text: "GST (5%)", colSpan: 5, alignment: "right", style: "totalCell" },
-                {}, {}, {}, {},
-                { text: `$${gstAmount.toFixed(2)}`, style: "totalCell" },
-              ],
-              [
-                { text: "Grand Total", colSpan: 5, alignment: "right", style: "totalCell" },
-                {}, {}, {}, {},
-                { text: `$${grandTotal.toFixed(2)}`, style: "totalCell" },
-              ],
-            ],
-          },
-          layout: {
-            hLineWidth: (i, node) => (i === 0 || i === node.table.body.length ? 1 : 0.5),
-            vLineWidth: () => 0.5,
-            hLineColor: (i) => (i === 0 ? "black" : "#aaa"),
-            vLineColor: () => "#aaa",
-            paddingLeft: () => 10,
-            paddingRight: () => 10,
-            paddingTop: () => 5,
-            paddingBottom: () => 5,
-          },
-        },
-        // Conditionally render helpers section
-        ...(helpers.length > 0 && helpers[0].name !== "" ? [
-          {
-            text: "Helpers", style: "helpersHeader", margin: [0, 20, 0, 10],
-          },
-          {
-            table: {
-              headerRows: 1,
-              widths: ['*', 70],
-              body: [
-                [
-                  { text: "Helper Name", style: "tableHeader" },
-                  { text: "Amount ($)", style: "tableHeader" },
+                columns: [
+                    {
+                        stack: [
+                            { text: "Shah Drywall Ltd.", style: "companyName" },
+                            { text: "6014 Saddlehorn Dr NE, T3J 4M4", style: "companyAddress" },
+                            { text: "GST Number: 123456789", style: "companyAddress" },
+                        ],
+                        alignment: "left",
+                    },
                 ],
-                ...helpers.map(helper => [
-                  { text: helper.name, style: "tableCell" },
-                  { text: `$${helper.amount}`, style: "tableCell" },
-                ]),
-              ],
+                margin: [0, 0, 0, 20],
             },
-            layout: 'lightHorizontalLines',
-          },
-        ] : []),
-        {
-          text: "Thank you for your business!", style: "thankYou", alignment: "center", margin: [0, 20, 0, 0],
+            { text: "Invoice", style: "header" },
+            {
+                columns: [
+                    {
+                        stack: [
+                            { text: `Date: ${new Date().toLocaleDateString()}`, style: "date" },
+                            { text: "Recipient: Dovmar Drywall Ltd.", style: "recipient" },
+                            { text: "Recipient Address: 74 Walden Manor SE, T2X 0N1", style: "recipientAddress" },
+                        ],
+                        alignment: "left",
+                    },
+                ],
+                margin: [0, 0, 0, 20],
+            },
+            {
+                table: {
+                    headerRows: 1,
+                    widths: [120, 50, 50, 50, 50, 70],
+                    body: [
+                        [
+                            { text: "Address", style: "tableHeader" },
+                            { text: "Area (sqft)", style: "tableHeader" },
+                            { text: "Floors", style: "tableHeader" },
+                            { text: "Rate (¢)", style: "tableHeader" },
+                            { text: "Sound Bars ($)", style: "tableHeader" },
+                            { text: "Amount ($)", style: "tableHeader" },
+                        ],
+                        ...addresses.map((address) => [
+                            { text: address.address, style: "tableCell", alignment: "left" },
+                            { text: `${address.area} sqft`, style: "tableCell", alignment: "center" },
+                            { text: `${address.floors}`, style: "tableCell", alignment: "center" },
+                            { text: `¢${address.rate}`, style: "tableCell", alignment: "center" },
+                            { text: `$${address.soundBars}`, style: "tableCell", alignment: "center" },
+                            { text: `$${address.amount}`, style: "tableCell", alignment: "center" },
+                        ]),
+                        [
+                            { text: "Total", colSpan: 5, alignment: "right", style: "totalCell" },
+                            {}, {}, {}, {},
+                            { text: `$${totalAmount.toFixed(2)}`, style: "totalCell" },
+                        ],
+                        [
+                            { text: "Helpers Total", colSpan: 5, alignment: "right", style: "totalCell" },
+                            {}, {}, {}, {},
+                            { text: `-$${totalHelpersAmount.toFixed(2)}`, style: "totalCell" },
+                        ],
+                        [
+                            { text: "Final Amount", colSpan: 5, alignment: "right", style: "totalCell" },
+                            {}, {}, {}, {},
+                            { text: `$${(totalAmount - totalHelpersAmount).toFixed(2)}`, style: "totalCell" },
+                        ],
+                        [
+                            { text: "GST (5%)", colSpan: 5, alignment: "right", style: "totalCell" },
+                            {}, {}, {}, {},
+                            { text: `$${gstAmount.toFixed(2)}`, style: "totalCell" },
+                        ],
+                        [
+                            { text: "Grand Total", colSpan: 5, alignment: "right", style: "totalCell" },
+                            {}, {}, {}, {},
+                            { text: `$${grandTotal.toFixed(2)}`, style: "totalCell" },
+                        ],
+                    ],
+                },
+                layout: {
+                    hLineWidth: (i, node) => (i === 0 || i === node.table.body.length ? 1 : 0.5),
+                    vLineWidth: () => 0.5,
+                    hLineColor: (i) => (i === 0 ? "black" : "#aaa"),
+                    vLineColor: () => "#aaa",
+                    paddingLeft: () => 10,
+                    paddingRight: () => 10,
+                    paddingTop: () => 5,
+                    paddingBottom: () => 5,
+                },
+            },
+            // Conditionally render helpers section
+            ...(helpers.length > 0 && helpers[0].name !== "" ? [
+                {
+                    text: "Helpers", style: "helpersHeader", margin: [0, 20, 0, 10],
+                },
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: ['*', 70],
+                        body: [
+                            [
+                                { text: "Helper Name", style: "tableHeader" },
+                                { text: "Amount ($)", style: "tableHeader" },
+                            ],
+                            ...helpers.map(helper => [
+                                { text: helper.name, style: "tableCell" },
+                                { text: `$${helper.amount}`, style: "tableCell" },
+                            ]),
+                        ],
+                    },
+                    layout: {
+                        hLineWidth: (i, node) => (i === 0 || i === node.table.body.length ? 1 : 0.5),
+                        vLineWidth: () => 0.5,
+                        hLineColor: (i) => (i === 0 ? "black" : "#aaa"),
+                        vLineColor: () => "#aaa",
+                        paddingLeft: () => 10,
+                        paddingRight: () => 10,
+                        paddingTop: () => 8, // Adjust top padding here
+                        paddingBottom: () => 8, // Adjust bottom padding here
+                    },
+                },
+            ] : []),
+            {
+                text: "Thank you for your business!", style: "thankYou", alignment: "center", margin: [0, 20, 0, 0],
+            },
+        ],
+        styles: {
+            companyName: {
+                fontSize: 14,
+                bold: true,
+                marginBottom: 2,
+            },
+            companyAddress: {
+                fontSize: 10,
+                marginBottom: 2,
+            },
+            date: {
+                fontSize: 10,
+                marginBottom: 2,
+            },
+            recipient: {
+                fontSize: 12,
+                bold: true,
+                marginBottom: 2,
+            },
+            recipientAddress: {
+                fontSize: 10,
+                marginBottom: 2,
+            },
+            header: {
+                fontSize: 18,
+                bold: true,
+                marginBottom: 20,
+                alignment: "center",
+            },
+            tableHeader: {
+                bold: true,
+                fontSize: 12,
+                color: "white",
+                fillColor: "#4F4F4F",
+            },
+            tableCell: {
+                fontSize: 10,
+                margin: [0, 5, 0, 5],
+            },
+            totalCell: {
+                fontSize: 10,
+                bold: true,
+                margin: [0, 5, 0, 5],
+            },
+            helpersHeader: {
+                fontSize: 14,
+                bold: true,
+                marginBottom: 10,
+            },
+            thankYou: {
+                fontSize: 12,
+                italics: true,
+                margin: [0, 20, 0, 0],
+            },
         },
-      ],
-      styles: {
-        companyName: {
-          fontSize: 14,
-          bold: true,
-          marginBottom: 2,
-        },
-        companyAddress: {
-          fontSize: 10,
-          marginBottom: 2,
-        },
-        date: {
-          fontSize: 10,
-          marginBottom: 2,
-        },
-        recipient: {
-          fontSize: 12,
-          bold: true,
-          marginBottom: 2,
-        },
-        recipientAddress: {
-          fontSize: 10,
-          marginBottom: 2,
-        },
-        header: {
-          fontSize: 18,
-          bold: true,
-          marginBottom: 20,
-          alignment: "center",
-        },
-        tableHeader: {
-          bold: true,
-          fontSize: 12,
-          color: "white",
-          fillColor: "#4F4F4F",
-        },
-        tableCell: {
-          fontSize: 10,
-          margin: [0, 5, 0, 5],
-        },
-        totalCell: {
-          fontSize: 10,
-          bold: true,
-          margin: [0, 5, 0, 5],
-        },
-        helpersHeader: {
-          fontSize: 14,
-          bold: true,
-          marginBottom: 10,
-        },
-        thankYou: {
-          fontSize: 12,
-          italics: true,
-          margin: [0, 20, 0, 0],
-        },
-      },
     };
   
     pdfMake.createPdf(docDefinition).download("invoice.pdf");
-  };
-  
+};
 
 
   return (
